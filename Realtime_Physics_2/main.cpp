@@ -133,7 +133,8 @@ void init()
 	particle_object.init(GEM_MESH, NULL, NULL);
 	cube_object.init(CUBE_MESH, BEAR_TEXTURE, NULL);
 	cube_object.mode = GL_QUADS;
-	body = RigidBody(glm::vec4(0.0, 0.0, 0.0, 0.0), glm::vec4(0.0, 0.0, 0.0, 0.0), glm::vec4(0.0, 0.0, 0.0, 0.0), 5, 1.0, 1.0, 1.0, cube_object);
+	body = RigidBody(glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 0.0), 5, glm::vec3(1.0, 1.0, 1.0), cube_object);
+	glm::vec4 test = glm::vec4(1.0, 2.0, 3.0, 4.0);
 }
 
 void display() 
@@ -186,11 +187,11 @@ void display()
 		}
 	}
 
-	model = body.orientationMat;
-	model = glm::translate(model, glm::vec3(body.position.x, body.position.y, body.position.z));
+	//model = glm::translate(glm::mat4(), body.position);
+	//model = body.orientationMat * model;
 	lightStruct.Kd = BLUE;
 	lightStruct.specular_exponent = 50.0f;
-	drawObject(noTextureShaderID, cam, body.mesh, model, false, lightStruct);
+	drawObject(noTextureShaderID, cam, body.mesh, glm::mat4(), false, lightStruct);
 	draw_texts();
 	glutSwapBuffers();
 }
@@ -207,30 +208,32 @@ void updateScene() {
 		if (rotateLight >= 360.0f)
 			rotateLight = 0.0f;
 
-		body.force = glm::vec4(0.0, 0.0, 0.0, 1.0);
-		body.torque = glm::vec4(0.0, 0.0, 0.0, 1.0);
+		body.force = glm::vec3(0.0, 0.0, 0.0);
+		body.torque = glm::vec3(0.0, 0.0, 0.0);
 		body.addForce(glm::vec3(50.0, 0.0, 0.0) * glm::vec3(force1, force1, force1), glm::vec3(0.5, 0.0, 0.5));
 		body.addForce(glm::vec3(2.0, 50.0, 0.0) * glm::vec3(force2, force2, force2), glm::vec3(0.0, 1.0, 0.0));
 		if (gravity)
-			body.torque += glm::vec4(0.0, 0.0, 50.0, 1.0);
+			body.torque += glm::vec3(0.0, 0.0, 50.0);
 		if (torque)
-			body.torque += glm::vec4(50.0, 0.0, 0.0, 1.0);
+			body.torque += glm::vec3(50.0, 0.0, 0.0);
 		if (force)
-			body.torque += glm::vec4(0.0, 50.0, 0.0, 1.0);
+			body.torque += glm::vec3(0.0, 50.0, 0.0);
 		cam.movForward(frontCam*speed);
 		cam.movRight(sideCam*speed);
 		cam.changeFront(pitCam, yawCam, rolCam);
 
-		//body.resolveForce(delta);
+		body.resolveForce(delta);
 		string values = "Force: [" + to_string(body.force.x) + ", " + to_string(body.force.y) + ", " + to_string(body.force.z) + "]\n";
 		values += "Torque: [" + to_string(body.torque.x) + ", " + to_string(body.torque.y) + ", " + to_string(body.torque.z) + "]\n";
 		values += "Linear Momentum: [" + to_string(body.linMomentum.x) + ", " + to_string(body.linMomentum.y) + ", " + to_string(body.linMomentum.z) + "]\n";
 		values += "Angular Momentum: [" + to_string(body.angMomentum.x) + ", " + to_string(body.angMomentum.y) + ", " + to_string(body.angMomentum.z) + "]\n";
 		values += "\n";
-		values += "Orientation Matrix: \n|"+ to_string(body.orientationMat[0][0]) + ", " + to_string(body.orientationMat[1][0]) + ", " + to_string(body.orientationMat[2][0]) + "|\n";
-		values += "|" + to_string(body.orientationMat[0][1]) + ", " + to_string(body.orientationMat[1][1]) + ", " + to_string(body.orientationMat[2][1]) + "|\n";
-		values += "|" + to_string(body.orientationMat[0][2]) + ", " + to_string(body.orientationMat[1][2]) + ", " + to_string(body.orientationMat[2][2]) + "|\n";
-		values += "\n";
+		values += "Position: [" + to_string(body.position.x) + ", " + to_string(body.position.y) + ", " + to_string(body.position.z) + "]\n\n";
+		//values += "Orientation Matrix: \n|"+ to_string(body.orientationMat[0][0]) + ", " + to_string(body.orientationMat[1][0]) + ", " + to_string(body.orientationMat[2][0]) + "|\n";
+		//values += "|" + to_string(body.orientationMat[0][1]) + ", " + to_string(body.orientationMat[1][1]) + ", " + to_string(body.orientationMat[2][1]) + "|\n";
+		//values += "|" + to_string(body.orientationMat[0][2]) + ", " + to_string(body.orientationMat[1][2]) + ", " + to_string(body.orientationMat[2][2]) + "|\n";
+		//values += "\n";
+		values += "Orientation Matrix: \n" + glm::to_string(body.orientationMat[0]) + "\n" + glm::to_string(body.orientationMat[1]) + "\n" + glm::to_string(body.orientationMat[2]) + "\n" + glm::to_string(body.orientationMat[3]) + "\n\n";
 
 		values += "Vertices: \n";
 		vector<float> vertices;
@@ -304,14 +307,14 @@ void keypressUp(unsigned char key, int x, int y)
 		force1 = false;
 	if (key == '2')
 		force2 = false;
-	//if (key == ' ')
-	//{
-	//	body.reset(glm::vec4(0.0, 0.0, 0.0, 0.0), glm::vec4(0.0, 0.0, 0.0, 0.0));
-	//}
-	//else if (key == '\\')
-	//{
-	//	body.reset(glm::vec4(0.0, 0.0, 0.0, 0.0), glm::vec4(500.0, 500.0, 500.0, 0.0));
-	//}
+	if (key == ' ')
+	{
+		body.reset(glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 0.0));
+	}
+	else if (key == '\\')
+	{
+		body.reset(glm::vec3(0.0, 500.0, 0.0), glm::vec3(500.0, 500.0, 500.0));
+	}
 	if ((key == 'g') || key == 'G')
 	{
 		gravity = false;

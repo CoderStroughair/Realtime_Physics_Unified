@@ -27,7 +27,7 @@ public:
 };
 
 class RigidBody {
-	glm::vec4 initialposition;
+	glm::vec3 initialposition;
 
 public:
 	//constants
@@ -36,18 +36,18 @@ public:
 	glm::mat4 ibodyInv;				//
 	SingleMesh mesh;
 
-	glm::vec4 position;				//x(t), ie, the center of mass
+	glm::vec3 position;				//x(t), ie, the center of mass
 	glm::mat4 orientationMat;		//R(t)
-	glm::vec4 linMomentum;			//P(t) = M*v(t)
-	glm::vec4 angMomentum;			//L(t) = I(t)*w(t)
+	glm::vec3 linMomentum;			//P(t) = M*v(t)
+	glm::vec3 angMomentum;			//L(t) = I(t)*w(t)
 
 
 	glm::mat4 iInv;
-	glm::vec4 velocity;				//Linear Velocity v(t) = P(t) / m
-	glm::vec4 angVelocity;			//w(t)
+	glm::vec3 velocity;				//Linear Velocity v(t) = P(t) / m
+	glm::vec3 angVelocity;			//w(t)
 
-	glm::vec4 force;
-	glm::vec4 torque;				//rho(t) = d/dt L(t) = SUM((pi - x(t))*fi)
+	glm::vec3 force;
+	glm::vec3 torque;				//rho(t) = d/dt L(t) = SUM((pi - x(t))*fi)
 
 								//mat3 inertiaTensor;		//I(t)	- Varies in World Space:	|	Ixx		Ixy		Ixz	|
 								//									|	Iyx		Iyy		Iyz	|
@@ -62,15 +62,15 @@ public:
 								//															|	 0		 0		 0		0	|
 
 	RigidBody() {};
-	RigidBody(glm::vec4 x, glm::vec4 P, glm::vec4 L, float m, float h, float d, float w, SingleMesh &_mesh)
+	RigidBody(glm::vec3 x, glm::vec3 P, glm::vec3 L, float m, glm::vec3 hdw, SingleMesh &_mesh)
 	{
 		initialposition = x;
 
 		float a = (1 / 12.0f) * m;
 		ibody = glm::mat4(
-			a*(h*h + d*d), 0.0f, 0.0f, 0.0f,
-			0.0f, a*(w*w + d*d), 0.0f, 0.0f,
-			0.0f, 0.0f, a*(w*w + h*h), 0.0f,
+			a*(hdw.x*hdw.x + hdw.y*hdw.y), 0.0f, 0.0f, 0.0f,
+			0.0f, a*(hdw.z*hdw.z + hdw.y*hdw.y), 0.0f, 0.0f,
+			0.0f, 0.0f, a*(hdw.z*hdw.z + hdw.x*hdw.x), 0.0f,
 			0.0f, 0.0f, 0.0f, 1.0f
 		);
 		ibodyInv = glm::inverse(ibody);
@@ -84,31 +84,30 @@ public:
 
 		velocity = linMomentum / mass;
 		iInv = orientationMat * ibodyInv * glm::transpose(orientationMat);
-		angVelocity = iInv * angMomentum;
+		angVelocity = glm::vec3(iInv * glm::vec4(angMomentum, 1.0));
 
-		force = glm::vec4(0.0, 0.0, 0.0, 0.0);
-		torque = glm::vec4(0.0, 0.0, 0.0, 0.0);
+		force = glm::vec3(0.0, 0.0, 0.0);
+		torque = glm::vec3(0.0, 0.0, 0.0);
 	}
 
 	void addForce(glm::vec3 f, glm::vec3 location)
 	{
-		force += glm::vec4(f.x, f.y, f.z, 1.0);
-		glm::vec3 deltaTorque = glm::cross(location, glm::vec3(force.x, force.y, force.z));
-		torque += glm::vec4(deltaTorque.x, deltaTorque.y, deltaTorque.z, 1.0);
+		force += f;
+		torque += glm::cross(location, force);
 	}
 
 	void resolveForce(float delta)
 	{
 		if (force.x)
 			cout << "";
-		linMomentum *= 0.0;
-		angMomentum *= 0.0;
+		linMomentum *= 0.7;
+		angMomentum *= 0.7;
 		linMomentum += force*delta;
 		angMomentum += torque*delta;
 
 		velocity = linMomentum / mass;
 		iInv = orientationMat * ibodyInv * glm::transpose(orientationMat);
-		angVelocity = (iInv * angMomentum);
+		angVelocity = glm::vec3(iInv * glm::vec4(angMomentum, 1.0f));
 
 		glm::mat4 rDot = star(angVelocity*delta)*orientationMat;
 		orientationMat[0][0] += rDot[0][0];
@@ -129,7 +128,7 @@ public:
 		orientationMat[3][0] += rDot[3][0];
 		orientationMat[3][1] += rDot[3][1];
 		orientationMat[3][2] += rDot[3][2];
-		orientationMat[3][3] = 0;
+		orientationMat[3][3] = 1;
 
 		//Orthonormalisation
 		glm::vec3 Cx = glm::vec3(orientationMat[0][0], orientationMat[0][1], orientationMat[0][2]) / glm::length(glm::vec3(orientationMat[0][0], orientationMat[0][1], orientationMat[0][2]));
@@ -158,7 +157,7 @@ public:
 		mesh.update_mesh(orientationMat, position);
 	}
 
-	glm::mat4 star(glm::vec4 a)
+	glm::mat4 star(glm::vec3 a)
 	{
 		glm::mat4 star = glm::mat4(
 			0, -a.z, a.y, 0,
@@ -169,7 +168,7 @@ public:
 		return glm::transpose(star);	//converting matrix into column order
 	}
 
-	void reset(glm::vec4 l, glm::vec4 a)
+	void reset(glm::vec3 l, glm::vec3 a)
 	{
 		position = initialposition;
 		orientationMat = glm::mat4();
@@ -178,10 +177,10 @@ public:
 
 		velocity = linMomentum / mass;
 		iInv = orientationMat * ibodyInv * glm::transpose(orientationMat);
-		angVelocity = (iInv * angMomentum);
+		angVelocity = glm::vec3(iInv * glm::vec4(angMomentum, 1.0));
 
-		force = glm::vec4(0.0, 0.0, 0.0, 0.0);
-		torque = glm::vec4(0.0, 0.0, 0.0, 0.0);
+		force = glm::vec3(0.0, 0.0, 0.0);
+		torque = glm::vec3(0.0, 0.0, 0.0);
 	}
 };
 

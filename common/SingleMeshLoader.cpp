@@ -307,20 +307,20 @@ bool SingleMesh::load_texture(const char* file_name, GLuint* tex)
 	return true;
 }
 
-bool SingleMesh::update_mesh(glm::mat4 orientation, glm::vec4 position)
+bool SingleMesh::update_mesh(glm::mat4 orientation, glm::vec3 position)
 {
 	for (int i = 0; i < mesh_vertex_count; i++)
 	{
 		static vector<GLfloat> initPoints = newpoints;
-		glm::vec4 vertice = glm::vec4(initPoints[i * 3], initPoints[i * 3 + 1], initPoints[i * 3 + 2], 1);
-		vertice = (orientation * vertice) + position;
+		glm::vec3 vertice = glm::vec3(initPoints[i * 3], initPoints[i * 3 + 1], initPoints[i * 3 + 2]);
+		vertice = glm::vec3(orientation * glm::vec4(vertice, 1.0)) + position;
 		newpoints[i * 3] = vertice.x;
 		newpoints[i * 3 + 1] = vertice.y;
 		newpoints[i * 3 + 2] = vertice.z;
 
 		static vector<GLfloat> initNormals = newnormals;
-		vertice = glm::vec4(initNormals[i * 3], initNormals[i * 3 + 1], initNormals[i * 3 + 2], 1);
-		vertice = (orientation * vertice) + position;
+		vertice = glm::vec3(initNormals[i * 3], initNormals[i * 3 + 1], initNormals[i * 3 + 2]);
+		vertice = glm::vec3(orientation * glm::vec4(vertice, 1.0)) + position;
 		newnormals[i * 3] = vertice.x;
 		newnormals[i * 3 + 1] = vertice.y;
 		newnormals[i * 3 + 2] = vertice.z;

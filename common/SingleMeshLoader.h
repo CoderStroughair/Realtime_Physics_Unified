@@ -45,7 +45,7 @@ public:
 	void init(const char* mesh_file, const char* tex_file, const char* normal_file);
 	void initCubeMap(GLfloat vertices[], int num_vertices, string texture);
 	void SingleMesh::loadCubeFace(GLuint textureID, GLenum side, const char* filename);
-	bool update_mesh(glm::mat4 orientation, glm::vec4 position);
+	bool update_mesh(glm::mat4 orientation, glm::vec3 position);
 
 	GLuint VAO[20], tex, norm;
 	int mesh_vertex_count, mesh_indice_count;
