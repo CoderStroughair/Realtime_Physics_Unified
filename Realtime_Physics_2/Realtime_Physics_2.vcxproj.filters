@@ -16,12 +16,32 @@
     <Filter Include="common">
       <UniqueIdentifier>{1fcb9109-10e0-44a0-b4aa-d82869ad6c09}</UniqueIdentifier>
     </Filter>
-    <Filter Include="common\Header Files">
-      <UniqueIdentifier>{4b6cc13c-63a2-4ebc-8f9f-382a96b19d39}</UniqueIdentifier>
-    </Filter>
     <Filter Include="common\Source Files">
       <UniqueIdentifier>{2deb0c6c-aa23-448b-b808-c581fab74235}</UniqueIdentifier>
     </Filter>
+    <Filter Include="common\Header Files">
+      <UniqueIdentifier>{afd309af-3ed2-44c1-86bc-7475643e05b1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\common\EulerCamera.cpp">
+      <Filter>common\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\SingleMeshLoader.cpp">
+      <Filter>common\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\text.cpp">
+      <Filter>common\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\Particle.cpp">
+      <Filter>common\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\RigidBody.cpp">
+      <Filter>common\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\common\Antons_maths_funcs.h">
@@ -34,6 +54,12 @@
       <Filter>common\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\common\Framebuffer.h">
+      <Filter>common\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\Particle.h">
+      <Filter>common\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\RigidBody.h">
       <Filter>common\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\common\Shader.h">
@@ -57,25 +83,5 @@
     <ClInclude Include="..\common\Utilities.h">
       <Filter>common\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\common\Particle.h">
-      <Filter>common\Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\common\EulerCamera.cpp">
-      <Filter>common\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\common\SingleMeshLoader.cpp">
-      <Filter>common\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\common\text.cpp">
-      <Filter>common\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>Resource Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\common\Particle.cpp">
-      <Filter>common\Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

@@ -71,6 +71,9 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir);$(SolutionDir)includes\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)libraries;$(LibraryPath)</LibraryPath>
+    <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -93,6 +96,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>assimp.lib;freeglut.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -146,6 +150,32 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\common\Antons_maths_funcs.h" />
+    <ClInclude Include="..\common\Collision.h" />
+    <ClInclude Include="..\common\Defines.h" />
+    <ClInclude Include="..\common\EulerCamera.h" />
+    <ClInclude Include="..\common\Forces.h" />
+    <ClInclude Include="..\common\Framebuffer.h" />
+    <ClInclude Include="..\common\Particle.h" />
+    <ClInclude Include="..\common\RigidBody.h" />
+    <ClInclude Include="..\common\RigidBodySystem.h" />
+    <ClInclude Include="..\common\Shader.h" />
+    <ClInclude Include="..\common\SingleMeshLoader.h" />
+    <ClInclude Include="..\common\stb_image.h" />
+    <ClInclude Include="..\common\teapot.h" />
+    <ClInclude Include="..\common\text.h" />
+    <ClInclude Include="..\common\Texture.h" />
+    <ClInclude Include="..\common\Utilities.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\common\EulerCamera.cpp" />
+    <ClCompile Include="..\common\Forces.cpp" />
+    <ClCompile Include="..\common\Particle.cpp" />
+    <ClCompile Include="..\common\RigidBody.cpp" />
+    <ClCompile Include="..\common\RigidBodySystem.cpp" />
+    <ClCompile Include="..\common\SingleMeshLoader.cpp" />
+    <ClCompile Include="..\common\text.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

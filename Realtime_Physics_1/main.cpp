@@ -8,7 +8,8 @@
 #include "glm/ext.hpp"
 #include <common/text.h>
 #include <common/Framebuffer.h>
-#include <common/Particle.h>
+#include <common/ParticleSystem.h>
+
 using namespace std;
 
 const int width = 800, height = 800;

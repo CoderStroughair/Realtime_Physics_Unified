@@ -151,7 +151,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\common\EulerCamera.cpp" />
+    <ClCompile Include="..\common\Forces.cpp" />
     <ClCompile Include="..\common\Particle.cpp" />
+    <ClCompile Include="..\common\ParticleSystem.cpp" />
     <ClCompile Include="..\common\SingleMeshLoader.cpp" />
     <ClCompile Include="..\common\text.cpp" />
     <ClCompile Include="main.cpp" />
@@ -160,8 +162,10 @@
     <ClInclude Include="..\common\Antons_maths_funcs.h" />
     <ClInclude Include="..\common\Defines.h" />
     <ClInclude Include="..\common\EulerCamera.h" />
+    <ClInclude Include="..\common\Forces.h" />
     <ClInclude Include="..\common\Framebuffer.h" />
     <ClInclude Include="..\common\Particle.h" />
+    <ClInclude Include="..\common\ParticleSystem.h" />
     <ClInclude Include="..\common\Shader.h" />
     <ClInclude Include="..\common\SingleMeshLoader.h" />
     <ClInclude Include="..\common\stb_image.h" />

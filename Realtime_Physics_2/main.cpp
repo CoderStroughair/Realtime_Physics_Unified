@@ -9,14 +9,13 @@
 #include "glm/ext.hpp"
 #include <common/text.h>
 #include <common/Particle.h>
+#include <common/RigidBody.h>
 
 using namespace std;
 
 const float width = 1200, height = 950;
 
-SingleMesh monkeyhead_object, torch_object, wall_object, cube, bear_object, signReflect_object, signRefract_object, signNormal_object;
-SingleMesh gem_object, sphere_object, particle_object, cube_object;
-
+SingleMesh torch_object, wall_object, skyBox, cube_object, sphere_object;
 
 //Cube Vertices for the Skybox
 GLfloat vertices[] = {
@@ -67,8 +66,8 @@ GLfloat vertices[] = {
 								SHADER VARIABLES
 ----------------------------------------------------------------------------*/
 
-GLuint noTextureShaderID, textureShaderID, cubeMapTextureID, refractiveShaderID, cubeMapShaderID;
-GLuint testID, normalisedShaderID, reflectiveShaderID, multiTextureShaderID, mirrorShaderID, debugSkyboxID;
+GLuint noTextureShaderID, textureShaderID, cubeMapShaderID;
+GLuint normalisedShaderID;
 Shader shaderFactory;
 /*----------------------------------------------------------------------------
 							CAMERA VARIABLES
@@ -94,6 +93,11 @@ bool force = false;
 bool gravity = false;
 bool force1 = false, force2 = false;
 
+/*----------------------------------------------------------------------------
+								FUNCTIONS
+----------------------------------------------------------------------------*/
+
+
 /*--------------------------------------------------------------------------*/
 
 void init()
@@ -107,34 +111,21 @@ void init()
 	//*************************//
 	//*****Compile Shaders*****//
 	//*************************//
-	refractiveShaderID = shaderFactory.CompileShader(NOTEXTURE_VERT, FRESNEL_FRAG);
 	noTextureShaderID = shaderFactory.CompileShader(NOTEXTURE_VERT, NOTEXTURE_FRAG);
 	cubeMapShaderID = shaderFactory.CompileShader(SKY_VERT, SKY_FRAG);
 	textureShaderID = shaderFactory.CompileShader(TEXTURE_VERT, TEXTURE_FRAG);
 	normalisedShaderID = shaderFactory.CompileShader(NORMAL_VERT, NORMAL_FRAG);
-	reflectiveShaderID = shaderFactory.CompileShader(NOTEXTURE_VERT, REFLECTIVE_FRAG);
-	multiTextureShaderID = shaderFactory.CompileShader(TEXTURE_VERT, TEXTURE_FRAG);
-	mirrorShaderID = shaderFactory.CompileShader(MIRROR_VERT, MIRROR_FRAG);
-	testID = shaderFactory.CompileShader(TEST_VERT, TEST_FRAG);
 	//*********************//
 	//*****Init Objects*****//
 	//*********************//
-	monkeyhead_object.init(MONKEYHEAD_MESH, NULL, NULL);
-	cube.initCubeMap(vertices, 36, "desert");
+	skyBox.initCubeMap(vertices, 36, "desert");
 	torch_object.init(TORCH_MESH, NULL, NULL);
 	torch_object.mode = GL_QUADS;
-	bear_object.init(BEAR_MESH, BEAR_TEXTURE, NULL);
 	wall_object.init(WALL_MESH, BRICK_TEXTURE, BRICK_NORMAL);
-	signReflect_object.init(SIGN_MESH, REFLECT_TEXTURE, NULL);
-	signRefract_object.init(SIGN_MESH, REFRACT_TEXTURE, NULL);
-	signNormal_object.init(SIGN_MESH, NORMAL_TEXTURE, NULL);
-	sphere_object.init(SPHERE_MESH, NULL, NULL);
-	gem_object.init(GEM_MESH, NULL, NULL);
-	particle_object.init(GEM_MESH, NULL, NULL);
 	cube_object.init(CUBE_MESH, BEAR_TEXTURE, NULL);
 	cube_object.mode = GL_QUADS;
-	body = RigidBody(glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 0.0), 5, glm::vec3(1.0, 1.0, 1.0), cube_object);
-	glm::vec4 test = glm::vec4(1.0, 2.0, 3.0, 4.0);
+	sphere_object.init(SPHERE_MESH, BEAR_TEXTURE, NULL);
+	body = RigidBody(glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 0.0), 5, glm::vec3(1.0, 1.0, 1.0), cube_object, sphere_object);
 }
 
 void display() 
@@ -159,12 +150,12 @@ void display()
 	lightStruct.specular_exponent = 0.5f; //specular exponent - size of the specular elements
 
 	model = glm::mat4();
-	drawCubeMap(cubeMapShaderID, cam, cube, lightStruct);
+	drawCubeMap(cubeMapShaderID, cam, skyBox, lightStruct);
 
 	model = glm::translate(glm::mat4(), lightStruct.lightLocation);
 	model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
 	lightStruct.Kd = WHITE;
-	drawObject(noTextureShaderID, cam, cube, model, false, lightStruct);
+	drawObject(noTextureShaderID, cam, skyBox, model, false, lightStruct);
 
 	model = glm::translate(glm::mat4(), glm::vec3(0.0f, -6.3f, 0.0f));
 	lightStruct.Kd = BROWN;
@@ -187,10 +178,8 @@ void display()
 		}
 	}
 
-	//model = glm::translate(glm::mat4(), body.position);
-	//model = body.orientationMat * model;
 	lightStruct.Kd = BLUE;
-	lightStruct.specular_exponent = 50.0f;
+	lightStruct.specular_exponent = 0.5f;
 	drawObject(noTextureShaderID, cam, body.mesh, glm::mat4(), false, lightStruct);
 	draw_texts();
 	glutSwapBuffers();
@@ -210,51 +199,21 @@ void updateScene() {
 
 		body.force = glm::vec3(0.0, 0.0, 0.0);
 		body.torque = glm::vec3(0.0, 0.0, 0.0);
-		body.addForce(glm::vec3(50.0, 0.0, 0.0) * glm::vec3(force1, force1, force1), glm::vec3(0.5, 0.0, 0.5));
-		body.addForce(glm::vec3(2.0, 50.0, 0.0) * glm::vec3(force2, force2, force2), glm::vec3(0.0, 1.0, 0.0));
+		body.addForce(glm::vec3(50.0f, 0.0f, 0.0f) * (force1 * 1.0f), glm::vec3(0.5, 0.0, 0.5));
+		body.addForce(glm::vec3(2.0f, 50.0f, 0.0f) * (force2 * 1.0f), glm::vec3(0.0, 1.0, 0.0));
 		if (gravity)
-			body.torque += glm::vec3(0.0, 0.0, 50.0);
+			body.force += glm::vec3(0.0f, -50.0f, 0.0f);
 		if (torque)
 			body.torque += glm::vec3(50.0, 0.0, 0.0);
 		if (force)
-			body.torque += glm::vec3(0.0, 50.0, 0.0);
+			body.force += glm::vec3(0.0, 50.0, 0.0);
 		cam.movForward(frontCam*speed);
 		cam.movRight(sideCam*speed);
 		cam.changeFront(pitCam, yawCam, rolCam);
 
 		body.resolveForce(delta);
-		string values = "Force: [" + to_string(body.force.x) + ", " + to_string(body.force.y) + ", " + to_string(body.force.z) + "]\n";
-		values += "Torque: [" + to_string(body.torque.x) + ", " + to_string(body.torque.y) + ", " + to_string(body.torque.z) + "]\n";
-		values += "Linear Momentum: [" + to_string(body.linMomentum.x) + ", " + to_string(body.linMomentum.y) + ", " + to_string(body.linMomentum.z) + "]\n";
-		values += "Angular Momentum: [" + to_string(body.angMomentum.x) + ", " + to_string(body.angMomentum.y) + ", " + to_string(body.angMomentum.z) + "]\n";
-		values += "\n";
-		values += "Position: [" + to_string(body.position.x) + ", " + to_string(body.position.y) + ", " + to_string(body.position.z) + "]\n\n";
-		//values += "Orientation Matrix: \n|"+ to_string(body.orientationMat[0][0]) + ", " + to_string(body.orientationMat[1][0]) + ", " + to_string(body.orientationMat[2][0]) + "|\n";
-		//values += "|" + to_string(body.orientationMat[0][1]) + ", " + to_string(body.orientationMat[1][1]) + ", " + to_string(body.orientationMat[2][1]) + "|\n";
-		//values += "|" + to_string(body.orientationMat[0][2]) + ", " + to_string(body.orientationMat[1][2]) + ", " + to_string(body.orientationMat[2][2]) + "|\n";
-		//values += "\n";
-		values += "Orientation Matrix: \n" + glm::to_string(body.orientationMat[0]) + "\n" + glm::to_string(body.orientationMat[1]) + "\n" + glm::to_string(body.orientationMat[2]) + "\n" + glm::to_string(body.orientationMat[3]) + "\n\n";
 
-		values += "Vertices: \n";
-		vector<float> vertices;
-		for (int i = 0; i < body.mesh.newpoints.size(); i=i+3)
-		{
-			vertices.push_back(body.mesh.newpoints[i]);
-			vertices.push_back(body.mesh.newpoints[i+1]);
-			vertices.push_back(body.mesh.newpoints[i+2]);
-			bool add = true;
-			for (int j = 0; j < i; j=j+3)
-			{
-				if ((vertices[i] == vertices[j]) && (vertices[i+1] == vertices[j+1]) && (vertices[i+2] == vertices[j+2]))
-				{
-					add = false;
-					break;
-				}
-			}
-			if (add)
-				values += "[" + to_string(body.mesh.newpoints[i]) + "," + to_string(body.mesh.newpoints[i+1]) + "," + to_string(body.mesh.newpoints[i+2]) + "]\n";
-		}
-		values += "\n";
+		string values = body.updateString();
 
 		update_text(textID, values.c_str());
 	}
@@ -281,8 +240,8 @@ void keypress(unsigned char key, int x, int y)
 		torque = true;
 	if ((key == 'f') || (key == 'F'))
 		force = true;
-	if ((key == 'g') || key == 'G')
-		gravity = true;
+//	if ((key == 'g') || key == 'G')
+//		gravity = true;
 	if (key == '1')
 		force1 = true;
 	if (key == '2')
@@ -317,7 +276,7 @@ void keypressUp(unsigned char key, int x, int y)
 	}
 	if ((key == 'g') || key == 'G')
 	{
-		gravity = false;
+		gravity = !gravity;
 	}
 }
 

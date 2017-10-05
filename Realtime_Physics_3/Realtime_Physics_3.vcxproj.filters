@@ -13,5 +13,78 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{88da1e3a-16da-48bf-8a0c-ddd890b31717}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common\Header Files">
+      <UniqueIdentifier>{9e6dfcf1-35b8-4b1f-8b44-f28c00debf2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common\Source Files">
+      <UniqueIdentifier>{3be94027-ea93-4eed-880f-b418837e7320}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\common\Antons_maths_funcs.h">
+      <Filter>common\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\Defines.h">
+      <Filter>common\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\EulerCamera.h">
+      <Filter>common\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\Framebuffer.h">
+      <Filter>common\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\Particle.h">
+      <Filter>common\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\RigidBody.h">
+      <Filter>common\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\Shader.h">
+      <Filter>common\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\SingleMeshLoader.h">
+      <Filter>common\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\stb_image.h">
+      <Filter>common\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\teapot.h">
+      <Filter>common\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\text.h">
+      <Filter>common\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\Texture.h">
+      <Filter>common\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\Utilities.h">
+      <Filter>common\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\Collision.h">
+      <Filter>common\Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\common\EulerCamera.cpp">
+      <Filter>common\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\Particle.cpp">
+      <Filter>common\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\RigidBody.cpp">
+      <Filter>common\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\SingleMeshLoader.cpp">
+      <Filter>common\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\text.cpp">
+      <Filter>common\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

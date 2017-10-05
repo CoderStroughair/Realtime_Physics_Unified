@@ -48,6 +48,9 @@ public:
 	glm::mat4 getProj();
 	void jump(bool& jumping);
 	void orbitAround(glm::vec3 point, GLfloat pi, GLfloat ya);
+	float getYaw() { return yaw; };
+	float getRoll() { return roll; };
+	float getPitch() { return pitch; };
 
 private:
 	GLuint cam_buffer;
