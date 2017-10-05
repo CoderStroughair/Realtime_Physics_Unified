@@ -125,7 +125,7 @@ void init()
 	cube_object.init(CUBE_MESH, BEAR_TEXTURE, NULL);
 	cube_object.mode = GL_QUADS;
 	sphere_object.init(SPHERE_MESH, BEAR_TEXTURE, NULL);
-	body = RigidBody(glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 0.0), 5, glm::vec3(1.0, 1.0, 1.0), cube_object, sphere_object);
+	body = RigidBody(glm::vec3(0.0, 0.0, 0.0), 5, glm::vec3(1.0, 1.0, 1.0), cube_object);
 }
 
 void display() 

@@ -31,7 +31,7 @@ EulerCamera cam(startingPos, width, height);
 /*----------------------------------------------------------------------------
 								SHADER VARIABLES
 ----------------------------------------------------------------------------*/
-GLuint simpleShaderID, noTextureShaderID, cubeMapShaderID;
+GLuint simpleShaderID, noTextureShaderID, cubeMapShaderID, textureShaderID;
 Shader shaderFactory;
 /*----------------------------------------------------------------------------
 							OTHER VARIABLES
@@ -43,6 +43,8 @@ const char* atlas_meta = "../freemono.meta";
 float fontSize = 25.0f;
 int textID = -1;
 bool pause = false;
+bool boundingMethod = true;
+int direction = 0;
 
 RigidBodySystem bodySystem;
 
@@ -106,13 +108,17 @@ void init()
 	simpleShaderID = shaderFactory.CompileShader(SIMPLE_VERT, SIMPLE_FRAG);
 	noTextureShaderID = shaderFactory.CompileShader(NOTEXTURE_VERT, NOTEXTURE_FRAG);
 	cubeMapShaderID = shaderFactory.CompileShader(SKY_VERT, SKY_FRAG);
+	textureShaderID = shaderFactory.CompileShader(TEXTURE_VERT, TEXTURE_FRAG);
+
 
 	skyBox.initCubeMap(vertices, 36, "desert");
 	cube.init(CUBE_MESH, NULL, NULL);
 	cube.mode = GL_QUADS;
 	sphere.init(SPHERE_MESH, NULL, NULL);
 
-	bodySystem = RigidBodySystem(10, cube, sphere);
+	bodySystem = RigidBodySystem(2, CUBE_MESH);
+	bodySystem.bodies[0].setPosition(glm::vec3(3.0, 0.0, 0.0));
+	bodySystem.bodies[1].setPosition(glm::vec3(-3.0, 0.0, 0.0));
 }
 
 void display() 
@@ -125,30 +131,28 @@ void display()
 	LightStruct lightStruct;
 	glm::mat4 model;
 	// light properties
-	//vec3 Ls = vec3(0.06f, 0.03f, 0.06f);	//Specular Reflected Light
-	//vec3 Ld = vec3(0.8f, 0.8f, 0.8f);	//Diffuse Surface Reflectance
-	//vec3 La = vec3(0.8f, 0.8f, 0.8f);	//Ambient Reflected Light
-	//vec3 light = vec3(1.8*cos(rotateLight), 1.8*sin(rotateLight) + 1.0f, -5.0f);//light source location
-	//vec3 coneDirection = light + vec3(0.0f, -1.0f, 0.0f);
-	//float coneAngle = 40.0f;
-	//// object colour
-	//vec3 Ks = vec3(0.01f, 0.01f, 0.01f); // specular reflectance
-	//vec3 Kd = BLUE;
-	//vec3 Ka = BLUE; // ambient reflectance
-	//float specular_exponent = 10.0f; //specular exponent - size of the specular elements
+	lightStruct.Ls = glm::vec3(0.1f, 0.1f, 0.1f);	//Specular Reflected Light
+	lightStruct.Ld = glm::vec3(0.99f, 0.99f, 0.99f);	//Diffuse Surface Reflectance
+	lightStruct.La = glm::vec3(0.4f, 0.4f, 0.4f);	//Ambient Reflected Light
+	lightStruct.lightLocation = glm::vec3(5 * sin(rotateLight), 10, -5.0f*cos(rotateLight));//light source location
+	// object colour
+	lightStruct.Ks = glm::vec3(0.1f, 0.1f, 0.1f); // specular reflectance
+	lightStruct.Kd = BROWN;
+	lightStruct.Ka = glm::vec3(0.5f, 0.5f, 0.5f); // ambient reflectance
+	lightStruct.specular_exponent = 0.5f; //specular exponent - size of the specular elements
 
-	model = glm::mat4();
 	drawCubeMap(cubeMapShaderID, cam, skyBox, lightStruct);
 
-	for (int i = 0; i < bodySystem.numBodies; i++)
+	for (int i = 0; i < bodySystem.bodies.size(); i++)
 	{
+		model = glm::mat4();
 		lightStruct.Ka = bodySystem.bodies[i].colour;
-		drawObject(noTextureShaderID, cam, bodySystem.bodies[i].mesh, model, false, lightStruct);
-		model = glm::translate(glm::mat4(), bodySystem.bodies[i].position);
+		drawObject(textureShaderID, cam, bodySystem.bodies[i].mesh, model, false, lightStruct);
+
 		if (bodySystem.bodies[i].colour == RED)
 		{
-			lightStruct.Ka = bodySystem.bodies[i].colour;
-			drawObject(noTextureShaderID, cam, bodySystem.bodies[i].boundingSphere, model, false, lightStruct);
+			string output = "Collision Detected\n";
+			update_text(textID, output.c_str());
 		}
 	}
 	draw_texts();
@@ -165,31 +169,24 @@ void updateScene()
 		delta = 0.03f;
 		lastFrame = currFrame;
 		glutPostRedisplay();
-
 		cam.movForward(frontCam*speed);
 		cam.movRight(sideCam*speed);
 		cam.changeFront(pitCam, yawCam, rolCam);
 		update_text(textID, "Paused");
 		if (!pause)
 		{
-			string output = "EULER_MODE: Front: " + glm::to_string(cam.getFront()) + "\n";
-			output += "Position: " + glm::to_string(cam.getPosition()) + "\n";
-			output += "Up: " + glm::to_string(cam.getUp()) + "\n";
-			output += "Pitch: " + glm::to_string(cam.getPitch()) + "\n";
-			output += "Yaw: " + glm::to_string(cam.getYaw()) + "\n";
-			output += "Roll: " + glm::to_string(cam.getRoll()) + "\n";
+			rotateLight = rotateLight + 0.01f;
+			if (rotateLight >= 360.0f)
+				rotateLight = 0.0f;
+			string output = "No Collisions Detected\n";
 			update_text(textID, output.c_str());
 
-			bodySystem.applyForces(delta);
-			bodySystem.checkSphericalCollisions();
-			bodySystem.checkPlaneCollisions(glm::vec3(5.0, 0.0, 0.0), glm::vec3(1.0, 1.0, 0.0), delta);
-			bodySystem.checkPlaneCollisions(glm::vec3(-5.0, 0.0, 0.0), glm::vec3(-1.0, 1.0, 0.0), delta);
-			bodySystem.checkPlaneCollisions(glm::vec3(5.0, 20.0, 0.0), glm::vec3(1.0, -1.0, 0.0), delta);
-			bodySystem.checkPlaneCollisions(glm::vec3(-5.0, 20.0, 0.0), glm::vec3(-1.0, -1.0, 0.0), delta);
-
+			bodySystem.bodies[0].clearMomentum();
+			bodySystem.bodies[0].addForce(glm::vec3(2000.0, 0.0, 0.0) * (1.0f*direction), glm::vec3(0.0, 0.0, 0.0));
+			bodySystem.bodies[0].resolveForce(delta);
+			bodySystem.checkCollisions(boundingMethod);
 		}
-	}
-	
+	}	
 }
 
 #pragma region INPUT FUNCTIONS
@@ -257,6 +254,9 @@ void keypressUp(unsigned char key, int x, int y){
 	case(' '):
 		pause = !pause;
 		break;
+	case(char(13)):
+		boundingMethod = !boundingMethod;
+		break;
 	}
 }
 
@@ -268,20 +268,14 @@ void specialKeypress(int key, int x, int y){
 		speed = 4;
 		break;
 	case (GLUT_KEY_LEFT):
-		printf("Spinning Negative Yaw\n");
-		yawCam = -1;
+		direction = 1;
 		break;
 	case (GLUT_KEY_RIGHT):
-		printf("Spinning Positive Yaw\n");
-		yawCam = 1;
+		direction = -1;
 		break;
 	case (GLUT_KEY_UP):
-		printf("Spinning Positive Pit\n");
-		pitCam = 1;
 		break;
 	case (GLUT_KEY_DOWN):
-		printf("Spinning Negative Pit\n");
-		pitCam = -1;
 		break;
 	}
 }
@@ -295,11 +289,10 @@ void specialKeypressUp(int key, int x, int y){
 		break;
 	case (GLUT_KEY_LEFT):
 	case (GLUT_KEY_RIGHT):
-		yawCam = 0;
+		direction = 0;
 		break;
 	case (GLUT_KEY_UP):
 	case (GLUT_KEY_DOWN):
-		pitCam = 0;
 		break;
 	}
 }

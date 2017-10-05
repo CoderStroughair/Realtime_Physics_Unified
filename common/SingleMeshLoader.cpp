@@ -307,20 +307,57 @@ bool SingleMesh::load_texture(const char* file_name, GLuint* tex)
 	return true;
 }
 
-bool SingleMesh::update_mesh(glm::mat4 orientation, glm::vec3 position)
+bool SingleMesh::update_mesh(glm::mat4 &orientation, glm::vec3 &position)
 {
 	for (int i = 0; i < mesh_vertex_count; i++)
 	{
-		static vector<GLfloat> initPoints = newpoints;
-		glm::vec3 vertice = glm::vec3(initPoints[i * 3], initPoints[i * 3 + 1], initPoints[i * 3 + 2]);
+		glm::vec3 vertice = { initialpoints[i * 3], initialpoints[i * 3 + 1], initialpoints[i * 3 + 2] };
 		vertice = glm::vec3(orientation * glm::vec4(vertice, 1.0)) + position;
 		newpoints[i * 3] = vertice.x;
 		newpoints[i * 3 + 1] = vertice.y;
 		newpoints[i * 3 + 2] = vertice.z;
 
-		static vector<GLfloat> initNormals = newnormals;
-		vertice = glm::vec3(initNormals[i * 3], initNormals[i * 3 + 1], initNormals[i * 3 + 2]);
+		vertice = { initialnormals[i * 3], initialnormals[i * 3 + 1], initialnormals[i * 3 + 2] };
 		vertice = glm::vec3(orientation * glm::vec4(vertice, 1.0)) + position;
+		newnormals[i * 3] = vertice.x;
+		newnormals[i * 3 + 1] = vertice.y;
+		newnormals[i * 3 + 2] = vertice.z;
+	}
+
+
+
+	glBindVertexArray(VAO[0]);
+	/* copy mesh data into VBOs */
+	GLuint vbo;
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, mesh_vertex_count * 3 * sizeof(GLfloat), newpoints.data(), GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(0);
+
+	GLuint vbo2;
+	glGenBuffers(1, &vbo2);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo2);
+	glBufferData(GL_ARRAY_BUFFER, 3 * mesh_vertex_count * sizeof(GLfloat), newnormals.data(), GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(1);
+
+	return true;
+}
+
+bool SingleMesh::scale_mesh(GLfloat scale)
+{
+	for (int i = 0; i < mesh_vertex_count; i++)
+	{
+		glm::vec3 vertice = glm::vec3(initialpoints[i * 3], initialpoints[i * 3 + 1], initialpoints[i * 3 + 2]);
+		vertice *= scale;
+		newpoints[i * 3] = vertice.x;
+		newpoints[i * 3 + 1] = vertice.y;
+		newpoints[i * 3 + 2] = vertice.z;
+
+		vertice = glm::vec3(initialnormals[i * 3], initialnormals[i * 3 + 1], initialnormals[i * 3 + 2]);
+		vertice *= scale;
+		vertice = glm::normalize(vertice);
 		newnormals[i * 3] = vertice.x;
 		newnormals[i * 3 + 1] = vertice.y;
 		newnormals[i * 3 + 2] = vertice.z;

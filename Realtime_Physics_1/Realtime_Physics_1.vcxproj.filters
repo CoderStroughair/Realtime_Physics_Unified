@@ -45,6 +45,9 @@
     <ClCompile Include="..\common\ParticleSystem.cpp">
       <Filter>common\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\RigidBody.cpp">
+      <Filter>common\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\common\Antons_maths_funcs.h">
@@ -87,6 +90,9 @@
       <Filter>common\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\common\ParticleSystem.h">
+      <Filter>common\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\RigidBody.h">
       <Filter>common\Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,57 +1,43 @@
 #include <common/RigidBodySystem.h>
 #include <list>
 
-RigidBodySystem::RigidBodySystem(int _numBodies, SingleMesh &m, SingleMesh &sphere) {
-	numBodies = _numBodies;
-	for (int i = 0; i < 2; i++)
+RigidBodySystem::RigidBodySystem(int _numBodies, const char* mesh) {
+
+	for (int i = 0; i < _numBodies; i++)
 	{
-		for (int j = 0; j < 5; j++)
-		{
-			RigidBody body({ i * 2, 15.0f, j * 2 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, 100.0f, { 1.0, 1.0, 1.0 }, m, sphere);
-			bodies.push_back(body);
-		}
+		SingleMesh m;
+		m.init(mesh, BRICK_TEXTURE, NULL);
+		m.mode = GL_QUADS;
+		RigidBody body({ 0.0f, 0.0f, 0.0f }, 100.0f, { 1.0, 1.0, 1.0 }, m);
+		bodies.push_back(body);
 	}
 };
 
 void RigidBodySystem::applyForces(float delta)
 {
-	for (int i = 0; i < numBodies; i++)
+	for (int i = 0; i < bodies.size(); i++)
 	{
 		bodies[i].force = { 0.0, 0.0, 0.0 };
 		g.applyForce(bodies[i]);
-		//d.applyForce(bodies[i]);
+		d.applyForce(bodies[i]);
 		bodies[i].torque = { -1.0, 5.0, 5.0 };
 		bodies[i].resolveForce(delta);
 	}
 }
 
-void RigidBodySystem::checkSphericalCollisions()
+bool RigidBodySystem::isSphereColliding(RigidBody& a, RigidBody& b)
 {
-	for (int i = 0; i < numBodies; i++)
-	{
-		bodies[i].colour = BLUE;
-	}
 	float coRest = 0.6;
-	for (int i = 0; i < numBodies; i++)
+	GLfloat distance = glm::length(a.position - b.position);
+	GLfloat radii = a.radius + b.radius;
+	if (distance < radii)	//first, are their spheres overlapping?
 	{
-		for (int j = i + 1; j < numBodies; j++)
-		{
-			if (i == j)
-				continue;
-			GLfloat distance = glm::length(bodies[i].position - bodies[j].position);
-			GLfloat radii = bodies[i].radius + bodies[j].radius;
-			if (distance < radii)	//first, are their spheres overlapping?
-			{
-				bodies[i].colour = RED;
-				bodies[j].colour = RED;
-				//Next, checking if the boundary boxes overlap. If they do, turn the colour purple instead of red.
-				checkBodyCollisions(bodies[i], bodies[j]);
-			}
-		}
+		return true;
 	}
+	return false;
 }
 
-void RigidBodySystem::checkBodyCollisions(RigidBody& a, RigidBody& b)
+bool RigidBodySystem::isBoxColliding(RigidBody& a, RigidBody& b)
 {
 	a.createBoundingBox();
 	b.createBoundingBox();
@@ -61,12 +47,49 @@ void RigidBodySystem::checkBodyCollisions(RigidBody& a, RigidBody& b)
 		{
 			if (checkInterval(a.boundingBox[2], a.boundingBox[5], b.boundingBox[2], b.boundingBox[5]))
 			{
-				a.colour = PURPLE;
-				b.colour = PURPLE;
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+void RigidBodySystem::checkCollisions(const bool& box)
+{
+	for (int i = 0; i < bodies.size(); i++)
+	{
+		bodies[i].colour = BLUE;
+	}
+	if (box)
+	{
+		for (int i = 0; i < bodies.size(); i++)
+		{
+			for (int j = i + 1; j < bodies.size(); j++)
+			{
+				if (isBoxColliding(bodies[i], bodies[j]))
+				{
+					bodies[i].colour = RED;
+					bodies[j].colour = RED;
+				}					
+			}
+		}
+	}
+	else
+	{
+		for (int i = 0; i < bodies.size(); i++)
+		{
+			for (int j = i + 1; j < bodies.size(); j++)
+			{
+				if (isSphereColliding(bodies[i], bodies[j]))
+				{
+					bodies[i].colour = RED;
+					bodies[j].colour = RED;
+				}
 			}
 		}
 	}
 }
+
 bool RigidBodySystem::checkInterval(float a1, float a2, float b1, float b2)
 {
 	pair<float, float> a(a1, a2);
@@ -77,10 +100,11 @@ bool RigidBodySystem::checkInterval(float a1, float a2, float b1, float b2)
 	blist.sort([](const pair<float, float> &a, const pair<float, float> &b) {return a.first < b.first; });
 	return(blist.front().second > blist.back().first);
 }
+
 void RigidBodySystem::checkPlaneCollisions(glm::vec3 point, glm::vec3 normal, float delta)
 {
 	float coRest = 0.0;
-	for (int i = 0; i < numBodies; i++)
+	for (int i = 0; i < bodies.size(); i++)
 	{
 		if (glm::dot((bodies[i].position - point), normal) <= bodies[i].radius + 0.00001f && glm::dot(bodies[i].linMomentum, normal) < 0.00001f)
 		{

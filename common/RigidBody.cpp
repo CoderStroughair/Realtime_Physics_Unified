@@ -1,7 +1,7 @@
 #include "RigidBody.h"
 #include "glm/ext.hpp"
 
-RigidBody::RigidBody(glm::vec3 x, glm::vec3 P, glm::vec3 L, float m, glm::vec3 hdw, SingleMesh &_mesh, SingleMesh &bound)
+RigidBody::RigidBody(glm::vec3 x, float m, glm::vec3 hdw, SingleMesh _mesh)
 {
 	initialposition = x;
 
@@ -15,12 +15,11 @@ RigidBody::RigidBody(glm::vec3 x, glm::vec3 P, glm::vec3 L, float m, glm::vec3 h
 	ibodyInv = glm::inverse(ibody);
 	mass = m;
 	mesh = _mesh;
-	boundingSphere = bound;
 
 	position = x;
 	orientationMat = glm::mat4();
-	linMomentum = P;
-	angMomentum = L;
+	linMomentum = {0.0f, 0.0f, 0.0f};
+	angMomentum = { 0.0f, 0.0f, 0.0f };
 
 	velocity = linMomentum / mass;
 	iInv = orientationMat * ibodyInv * glm::transpose(orientationMat);
@@ -28,6 +27,17 @@ RigidBody::RigidBody(glm::vec3 x, glm::vec3 P, glm::vec3 L, float m, glm::vec3 h
 
 	force = glm::vec3(0.0, 0.0, 0.0);
 	torque = glm::vec3(0.0, 0.0, 0.0);
+
+	for (int i = 0; i < mesh.mesh_vertex_count; i += 3)
+	{
+		glm::vec3 vertex = glm::vec3(mesh.newpoints[i], mesh.newpoints[i + 1], mesh.newpoints[i + 2]);
+		if (glm::length(vertex) > radius)
+		{
+			radius = glm::length(vertex);
+		}
+	}
+	mesh.update_mesh(orientationMat, x);
+	createBoundingBox();
 }
 
 void RigidBody::addForce(glm::vec3 f, glm::vec3 location)
@@ -38,10 +48,8 @@ void RigidBody::addForce(glm::vec3 f, glm::vec3 location)
 
 void RigidBody::resolveForce(float delta)
 {
-	if (force.x)
-		cout << "";
-	linMomentum *= 0.7;
-	angMomentum *= 0.7;
+	//linMomentum *= 0.7;
+	//angMomentum *= 0.7;
 	linMomentum += force*delta;
 	angMomentum += torque*delta;
 
@@ -90,11 +98,10 @@ void RigidBody::resolveForce(float delta)
 	orientationMat[2][2] = Cz.z;
 
 	position += velocity * delta;
-
-	if (force.x)
-		cout << "";
-
 	mesh.update_mesh(orientationMat, position);
+
+	force = { 0.0f, 0.0f, 0.0f };
+	torque = { 0.0f, 0.0f, 0.0f };
 }
 
 glm::mat4 RigidBody::star(glm::vec3 a)
@@ -121,6 +128,7 @@ void RigidBody::reset(glm::vec3 l, glm::vec3 a)
 
 	force = glm::vec3(0.0, 0.0, 0.0);
 	torque = glm::vec3(0.0, 0.0, 0.0);
+	mesh.update_mesh(orientationMat, position);
 }
 
 std::string RigidBody::updateString()
@@ -189,4 +197,16 @@ void RigidBody::createBoundingBox()
 bool RigidBody::operator==(const RigidBody &b)
 {
 	return (identifier == b.identifier);
+}
+
+void RigidBody::setPosition(glm::vec3 position)
+{
+	initialposition = position;
+	reset(glm::vec3(), glm::vec3());
+}
+
+void RigidBody::clearMomentum()
+{
+	linMomentum = { 0.0f, 0.0f, 0.0f };
+	angMomentum = { 0.0f, 0.0f, 0.0f };
 }

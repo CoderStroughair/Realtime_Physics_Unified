@@ -164,6 +164,7 @@ void drawObject(GLuint shaderID, EulerCamera cam, SingleMesh &mesh, glm::mat4 mo
 	glUniform3fv(glGetUniformLocation(shaderID, "Ka"), 1, &lightLocation.Ka[0]);
 
 	glUniform3fv(glGetUniformLocation(shaderID, "light"), 1, &lightLocation.lightLocation[0]);
+	glUniform3fv(glGetUniformLocation(shaderID, "camPos"), 1, &cam.getPosition()[0]);
 	glUniform1f(glGetUniformLocation(shaderID, "specular_exponent"), lightLocation.specular_exponent);
 
 	if (cone)

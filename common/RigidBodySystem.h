@@ -4,19 +4,20 @@
 class RigidBodySystem {
 public:
 	vector<RigidBody> bodies;
-	int numBodies;
 	Drag d;
 	Gravity g;
 
 	RigidBodySystem() {};
 
-	RigidBodySystem(int _numBodies, SingleMesh &m, SingleMesh &sphere);
+	RigidBodySystem(int _numBodies, const char* mesh);
 
 	void applyForces(float delta);
 
-	void checkSphericalCollisions();
+	bool isBoxColliding(RigidBody& a, RigidBody& b);
 
-	void checkBodyCollisions(RigidBody& a, RigidBody& b);
+	bool isSphereColliding(RigidBody& a, RigidBody& b);
+
+	void checkCollisions(const bool &box);
 
 	bool checkInterval(float a1, float a2, float b1, float b2);
 

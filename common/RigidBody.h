@@ -16,7 +16,6 @@ public:
 	glm::mat4 ibody;				//									
 	glm::mat4 ibodyInv;				//
 	SingleMesh mesh;
-	SingleMesh boundingSphere;
 
 	glm::vec3 position;				//x(t), ie, the center of mass
 	glm::mat4 orientationMat;		//R(t)
@@ -46,7 +45,7 @@ public:
 	float boundingBox[6];
 
 	RigidBody() {};
-	RigidBody(glm::vec3 x, glm::vec3 P, glm::vec3 L, float m, glm::vec3 hdw, SingleMesh &_mesh, SingleMesh &bound);
+	RigidBody(glm::vec3 x, float m, glm::vec3 hdw, SingleMesh _mesh);
 
 	void addForce(glm::vec3 f, glm::vec3 location);
 
@@ -62,5 +61,7 @@ public:
 
 	bool operator==(const RigidBody &b);
 
+	void setPosition(glm::vec3 position);
 
+	void clearMomentum();
 };
