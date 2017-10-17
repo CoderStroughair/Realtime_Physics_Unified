@@ -68,7 +68,6 @@ GLfloat vertices[] = {
 
 GLuint noTextureShaderID, textureShaderID, cubeMapShaderID;
 GLuint normalisedShaderID;
-Shader shaderFactory;
 /*----------------------------------------------------------------------------
 							CAMERA VARIABLES
 ----------------------------------------------------------------------------*/
@@ -111,10 +110,12 @@ void init()
 	//*************************//
 	//*****Compile Shaders*****//
 	//*************************//
-	noTextureShaderID = shaderFactory.CompileShader(NOTEXTURE_VERT, NOTEXTURE_FRAG);
-	cubeMapShaderID = shaderFactory.CompileShader(SKY_VERT, SKY_FRAG);
-	textureShaderID = shaderFactory.CompileShader(TEXTURE_VERT, TEXTURE_FRAG);
-	normalisedShaderID = shaderFactory.CompileShader(NORMAL_VERT, NORMAL_FRAG);
+	Shader* shaderFactory = Shader::getInstance();
+	noTextureShaderID = shaderFactory->CompileShader(NOTEXTURE_VERT, NOTEXTURE_FRAG);
+	cubeMapShaderID = shaderFactory->CompileShader(SKY_VERT, SKY_FRAG);
+	textureShaderID = shaderFactory->CompileShader(TEXTURE_VERT, TEXTURE_FRAG);
+	normalisedShaderID = shaderFactory->CompileShader(NORMAL_VERT, NORMAL_FRAG);
+	Shader::resetInstance();
 	//*********************//
 	//*****Init Objects*****//
 	//*********************//

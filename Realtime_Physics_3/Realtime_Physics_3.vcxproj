@@ -38,6 +38,7 @@
     <ClCompile Include="..\common\EulerCamera.cpp" />
     <ClCompile Include="..\common\Particle.cpp" />
     <ClCompile Include="..\common\RigidBody.cpp" />
+    <ClCompile Include="..\common\Shader.cpp" />
     <ClCompile Include="..\common\SingleMeshLoader.cpp" />
     <ClCompile Include="..\common\text.cpp" />
     <ClCompile Include="main.cpp" />

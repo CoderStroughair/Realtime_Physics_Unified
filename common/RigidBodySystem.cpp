@@ -20,7 +20,6 @@ void RigidBodySystem::applyForces(float delta)
 		bodies[i].force = { 0.0, 0.0, 0.0 };
 		g.applyForce(bodies[i]);
 		d.applyForce(bodies[i]);
-		bodies[i].torque = { -1.0, 5.0, 5.0 };
 		bodies[i].resolveForce(delta);
 	}
 }

@@ -9,7 +9,6 @@
 #include <common/text.h>
 #include <common/Collision.h>
 #include <common/RigidBodySystem.h>
-
 using namespace std;
 
 const float width = 900, height = 900;
@@ -17,11 +16,12 @@ const float width = 900, height = 900;
 						MESH AND TEXTURE VARIABLES
 ----------------------------------------------------------------------------*/
 
-SingleMesh skyBox, cube, sphere;
+SingleMesh skyBox, cube;
 
 /*----------------------------------------------------------------------------
 							CAMERA VARIABLES
 ----------------------------------------------------------------------------*/
+
 glm::vec3 startingPos = { 0.0f, 0.0f, -20.0f };
 GLfloat pitCam = 0, yawCam = 0, rolCam = 0, frontCam = 0, sideCam = 0, speed = 1;
 float rotateY = 50.0f, rotateLight = 0.0f;
@@ -31,7 +31,7 @@ EulerCamera cam(startingPos, width, height);
 /*----------------------------------------------------------------------------
 								SHADER VARIABLES
 ----------------------------------------------------------------------------*/
-GLuint simpleShaderID, noTextureShaderID, cubeMapShaderID, textureShaderID;
+GLuint simpleShaderID, noTextureShaderID, cubeMapShaderID;
 Shader shaderFactory;
 /*----------------------------------------------------------------------------
 							OTHER VARIABLES
@@ -43,8 +43,6 @@ const char* atlas_meta = "../freemono.meta";
 float fontSize = 25.0f;
 int textID = -1;
 bool pause = false;
-bool boundingMethod = true;
-int direction = 0;
 
 RigidBodySystem bodySystem;
 
@@ -108,17 +106,16 @@ void init()
 	simpleShaderID = shaderFactory.CompileShader(SIMPLE_VERT, SIMPLE_FRAG);
 	noTextureShaderID = shaderFactory.CompileShader(NOTEXTURE_VERT, NOTEXTURE_FRAG);
 	cubeMapShaderID = shaderFactory.CompileShader(SKY_VERT, SKY_FRAG);
-	textureShaderID = shaderFactory.CompileShader(TEXTURE_VERT, TEXTURE_FRAG);
-
 
 	skyBox.initCubeMap(vertices, 36, "desert");
 	cube.init(CUBE_MESH, NULL, NULL);
 	cube.mode = GL_QUADS;
-	sphere.init(SPHERE_MESH, NULL, NULL);
 
-	bodySystem = RigidBodySystem(2, CUBE_MESH);
-	bodySystem.bodies[0].setPosition(glm::vec3(3.0, 0.0, 0.0));
-	bodySystem.bodies[1].setPosition(glm::vec3(-3.0, 0.0, 0.0));
+	bodySystem = RigidBodySystem(1, CUBE_MESH);
+	//bodySystem.bodies[0].angMomentum += vec3(1.0, 0.0, 0.0);
+
+	//print(cross(vec3(1.0, 0.0, 0.0), vec3(0.0, 0.0, 1.0)));
+	//print(cross(vec3(-1.0, 0.0, 0.0), vec3(0.0, 0.0, 1.0)));
 }
 
 void display() 
@@ -128,6 +125,7 @@ void display()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		// Clear the color and buffer bits to make a clean slate
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);					//Create a background	
 
+															// light properties
 	LightStruct lightStruct;
 	glm::mat4 model;
 	// light properties
@@ -135,7 +133,7 @@ void display()
 	lightStruct.Ld = glm::vec3(0.99f, 0.99f, 0.99f);	//Diffuse Surface Reflectance
 	lightStruct.La = glm::vec3(0.4f, 0.4f, 0.4f);	//Ambient Reflected Light
 	lightStruct.lightLocation = glm::vec3(5 * sin(rotateLight), 10, -5.0f*cos(rotateLight));//light source location
-	// object colour
+																							// object colour
 	lightStruct.Ks = glm::vec3(0.1f, 0.1f, 0.1f); // specular reflectance
 	lightStruct.Kd = BROWN;
 	lightStruct.Ka = glm::vec3(0.5f, 0.5f, 0.5f); // ambient reflectance
@@ -150,10 +148,7 @@ void display()
 		drawObject(noTextureShaderID, cam, bodySystem.bodies[i].mesh, model, false, lightStruct);
 
 		string output = "Collision Detection System\n";
-		if (boundingMethod)
-			output += "Detection Method: Box Collision\n";
-		else
-			output += "Detection Method: Bounding Sphere Collision\n";
+		output += "Detection Method: Box Collision\n";
 
 		if (bodySystem.bodies[i].colour == RED)
 		{
@@ -164,6 +159,7 @@ void display()
 		update_text(textID, output.c_str());
 
 	}
+
 	draw_texts();
 	glutSwapBuffers();
 }
@@ -173,27 +169,31 @@ void updateScene()
 	static clock_t lastFrame = clock();
 	clock_t currFrame = clock();
 	float delta = (currFrame - lastFrame) / (float)CLOCKS_PER_SEC;
-	if (delta >= 0.03f) 
+	if (delta >= 0.03f)
 	{
 		delta = 0.03f;
 		lastFrame = currFrame;
 		glutPostRedisplay();
+
 		cam.movForward(frontCam*speed);
 		cam.movRight(sideCam*speed);
 		cam.changeFront(pitCam, yawCam, rolCam);
-		update_text(textID, "Paused");
+		string output = bodySystem.bodies[0].updateString();
+		update_text(textID, output.c_str());
 		if (!pause)
 		{
-			rotateLight = rotateLight + 0.01f;
-			if (rotateLight >= 360.0f)
-				rotateLight = 0.0f;
-
-			bodySystem.bodies[0].clearMomentum();
-			bodySystem.bodies[0].addForce(glm::vec3(2000.0, 0.0, 0.0) * (1.0f*direction), glm::vec3(0.0, 0.0, 0.0));
-			bodySystem.bodies[0].resolveForce(delta);
-			bodySystem.checkCollisions(boundingMethod);
+			//Physics:
+			//First, clear the forces from the previous frame.
+			//Next, apply any new forces for this frame, and calculate the change in position.
+			//Next, check if any collisions occur.
+			//Resolve the collisions, and update the position accordingly.
+			//Set the position in stone by updating the mesh.
+			bodySystem.applyForces(delta);
+			bodySystem.checkPlaneCollisions({0.0, 0.0, 0.0}, { 0.0, 1.0, 0.0 }, delta);
+			bodySystem.bodies[0].updatePosition(delta);
 		}
-	}	
+	}
+	
 }
 
 #pragma region INPUT FUNCTIONS
@@ -207,32 +207,26 @@ void keypress(unsigned char key, int x, int y) {
 	case('w'):
 	case('W'):
 		frontCam = 1;
-		std::printf("Moving Forward\n");
 		break;
 	case('s'):
 	case('S'):
 		frontCam = -1;
-		std::printf("Moving Backward\n");
 		break;
 	case('a'):
 	case('A'):
 		sideCam = -1;
-		std::printf("Moving Left\n");
 		break;
 	case('d'):
 	case('D'):
 		sideCam = 1;
-		std::printf("Moving Right\n");
 		break;
 	case('q'):
 	case('Q'):
 		rolCam = -1;
-		std::printf("Spinning Negative Roll\n");
 		break;
 	case('e'):
 	case('E'):
 		rolCam = 1;
-		std::printf("Spinning Positive Roll\n");
 		break;
 	}
 }
@@ -261,9 +255,6 @@ void keypressUp(unsigned char key, int x, int y){
 	case(' '):
 		pause = !pause;
 		break;
-	case(char(13)):
-		boundingMethod = !boundingMethod;
-		break;
 	}
 }
 
@@ -275,14 +266,16 @@ void specialKeypress(int key, int x, int y){
 		speed = 4;
 		break;
 	case (GLUT_KEY_LEFT):
-		direction = 1;
+		yawCam = -1;
 		break;
 	case (GLUT_KEY_RIGHT):
-		direction = -1;
+		yawCam = 1;
 		break;
 	case (GLUT_KEY_UP):
+		pitCam = 1;
 		break;
 	case (GLUT_KEY_DOWN):
+		pitCam = -1;
 		break;
 	}
 }
@@ -296,10 +289,11 @@ void specialKeypressUp(int key, int x, int y){
 		break;
 	case (GLUT_KEY_LEFT):
 	case (GLUT_KEY_RIGHT):
-		direction = 0;
+		yawCam = 0;
 		break;
 	case (GLUT_KEY_UP):
 	case (GLUT_KEY_DOWN):
+		pitCam = 0;
 		break;
 	}
 }
@@ -345,3 +339,4 @@ int main(int argc, char** argv) {
 	glutMainLoop();
 	return 0;
 }
+

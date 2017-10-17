@@ -48,6 +48,9 @@
     <ClCompile Include="..\common\RigidBody.cpp">
       <Filter>common\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\Shader.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\common\Antons_maths_funcs.h">
