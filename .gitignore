@@ -11,7 +11,11 @@
 *.userprefs
 
 # Build results
-[Dd]ebug/
+#[Dd]ebug/
+*.tlog
+.lastbuildstate
+*.idb
+
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
@@ -49,7 +53,9 @@ artifacts/
 *_i.h
 *.ilk
 *.meta
+!*/Debug/freemono.meta
 *.obj
+!Meshes/*
 *.pch
 *.pdb
 *.pgc
@@ -68,6 +74,7 @@ artifacts/
 *.pidb
 *.svclog
 *.scc
+*.exe
 
 # Chutzpah Test files
 _Chutzpah*
