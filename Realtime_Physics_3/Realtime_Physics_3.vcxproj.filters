@@ -63,6 +63,12 @@
     <ClInclude Include="..\common\Utilities.h">
       <Filter>common\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\common\Forces.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\ParticleSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\common\Collision.h">
       <Filter>common\Header Files</Filter>
     </ClInclude>
@@ -88,6 +94,12 @@
     </ClCompile>
     <ClCompile Include="..\common\Shader.cpp">
       <Filter>common\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\Forces.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\ParticleSystem.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

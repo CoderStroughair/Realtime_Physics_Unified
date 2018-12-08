@@ -72,11 +72,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(SolutionDir);$(SolutionDir)includes\;$(IncludePath)</IncludePath>
+	<OutDir>$(SolutionDir)\Debug</OutDir>
     <LibraryPath>$(SolutionDir)libraries;$(LibraryPath)</LibraryPath>
-    <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+	<IncludePath>$(MSBuildStartupDirectory);$(MSBuildStartupDirectory)\includes;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>

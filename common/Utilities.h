@@ -41,7 +41,7 @@ void drawCubeMap(GLuint shaderID, EulerCamera cam, SingleMesh &mesh, LightStruct
 
 void drawLine(GLuint shaderID, glm::mat4 model, glm::mat4 proj, glm::vec3 origin, glm::vec3 destination, glm::vec3 colour);
 
-void drawTriangle(GLuint shaderID, glm::mat4 model, glm::mat4 proj, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, glm::vec3 colour);
+void drawTriangle(GLuint shaderID, glm::mat4 model, glm::mat4 proj, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, glm::vec3 colour, bool wireframe = false);
 
 void drawPoint(GLuint shaderID, glm::mat4 model, glm::mat4 proj, glm::vec3 point, glm::vec3 colour);
 /*----------------------------------------------------------------------------
@@ -246,7 +246,7 @@ void drawLine(GLuint shaderID, glm::mat4 model, glm::mat4 proj, glm::vec3 origin
 	glDrawArrays(GL_LINES, 0, 2);
 }
 
-void drawTriangle(GLuint shaderID, glm::mat4 model, glm::mat4 proj, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, glm::vec3 colour)
+void drawTriangle(GLuint shaderID, glm::mat4 model, glm::mat4 proj, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, glm::vec3 colour, bool wireframe)
 {
 	GLfloat points[] =
 	{
@@ -269,7 +269,16 @@ void drawTriangle(GLuint shaderID, glm::mat4 model, glm::mat4 proj, glm::vec3 v1
 	glBindVertexArray(vao);
 	glUniform3fv(glGetUniformLocation(shaderID, "colour"), 1, &colour[0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderID, "model"), 1, GL_FALSE, &model[0][0]);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	if (wireframe)
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+	else
+	{
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+	}
 }
 
 void drawPoint(GLuint shaderID, glm::mat4 model, glm::mat4 proj, glm::vec3 point, glm::vec3 colour)

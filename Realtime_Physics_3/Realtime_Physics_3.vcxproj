@@ -18,31 +18,6 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\common\Antons_maths_funcs.h" />
-    <ClInclude Include="..\common\Collision.h" />
-    <ClInclude Include="..\common\Defines.h" />
-    <ClInclude Include="..\common\EulerCamera.h" />
-    <ClInclude Include="..\common\Framebuffer.h" />
-    <ClInclude Include="..\common\Particle.h" />
-    <ClInclude Include="..\common\RigidBody.h" />
-    <ClInclude Include="..\common\Shader.h" />
-    <ClInclude Include="..\common\SingleMeshLoader.h" />
-    <ClInclude Include="..\common\stb_image.h" />
-    <ClInclude Include="..\common\teapot.h" />
-    <ClInclude Include="..\common\text.h" />
-    <ClInclude Include="..\common\Texture.h" />
-    <ClInclude Include="..\common\Utilities.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\common\EulerCamera.cpp" />
-    <ClCompile Include="..\common\Particle.cpp" />
-    <ClCompile Include="..\common\RigidBody.cpp" />
-    <ClCompile Include="..\common\Shader.cpp" />
-    <ClCompile Include="..\common\SingleMeshLoader.cpp" />
-    <ClCompile Include="..\common\text.cpp" />
-    <ClCompile Include="main.cpp" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E65B59A0-8659-429F-B0C1-3B14339B09D0}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -96,12 +71,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
     <IncludePath>$(SolutionDir);$(SolutionDir)includes\;$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir)\Debug</OutDir>
     <LibraryPath>$(SolutionDir)libraries;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(MSBuildStartupDirectory);$(MSBuildStartupDirectory)\includes;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -174,6 +150,35 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\common\EulerCamera.cpp" />
+    <ClCompile Include="..\common\Forces.cpp" />
+    <ClCompile Include="..\common\Particle.cpp" />
+    <ClCompile Include="..\common\ParticleSystem.cpp" />
+    <ClCompile Include="..\common\RigidBody.cpp" />
+    <ClCompile Include="..\common\Shader.cpp" />
+    <ClCompile Include="..\common\SingleMeshLoader.cpp" />
+    <ClCompile Include="..\common\text.cpp" />
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\common\Antons_maths_funcs.h" />
+    <ClInclude Include="..\common\Collision.h" />
+    <ClInclude Include="..\common\Defines.h" />
+    <ClInclude Include="..\common\EulerCamera.h" />
+    <ClInclude Include="..\common\Forces.h" />
+    <ClInclude Include="..\common\Framebuffer.h" />
+    <ClInclude Include="..\common\Particle.h" />
+    <ClInclude Include="..\common\ParticleSystem.h" />
+    <ClInclude Include="..\common\RigidBody.h" />
+    <ClInclude Include="..\common\Shader.h" />
+    <ClInclude Include="..\common\SingleMeshLoader.h" />
+    <ClInclude Include="..\common\stb_image.h" />
+    <ClInclude Include="..\common\teapot.h" />
+    <ClInclude Include="..\common\text.h" />
+    <ClInclude Include="..\common\Texture.h" />
+    <ClInclude Include="..\common\Utilities.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

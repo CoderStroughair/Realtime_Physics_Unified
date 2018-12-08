@@ -12,6 +12,7 @@
 using namespace std;
 
 const float width = 900, height = 900;
+const glm::mat4 identityMat = glm::mat4(); //Singleton Identity Matrix to reduce memory allocation
 /*----------------------------------------------------------------------------
 						MESH AND TEXTURE VARIABLES
 ----------------------------------------------------------------------------*/
@@ -22,12 +23,24 @@ glm::vec3 trianglePoints[2];
 
 glm::vec3 triangle[] =
 {
-	glm::vec3(0.0f, 0.5f, 0.0f),
-	glm::vec3(0.5f, -0.5f, 0.0f),
-	glm::vec3(-0.5f, -0.5f, 0.0f)
+	glm::vec3(0.0f, 0.666f, 0.0f),
+	glm::vec3(0.5f, -0.3335f, 0.0f),
+	glm::vec3(-0.5f, -0.3335f, 0.0f)
 };
 
-vector<glm::vec3> mouseTriangle(triangle, triangle + (sizeof triangle / sizeof triangle[0]));
+glm::vec3 mouseTriangle[] = 
+{
+	glm::vec3(),
+	glm::vec3(),
+	glm::vec3()
+};
+
+glm::vec3 simplex[] =
+{
+	glm::vec3(),
+	glm::vec3(),
+	glm::vec3()
+};
 
 
 /*----------------------------------------------------------------------------
@@ -43,6 +56,8 @@ const char* atlas_meta = "../freemono.meta";
 
 float fontSize = 25.0f;
 int textID = -1;
+float triangleDistance;
+string text;
 /*----------------------------------------------------------------------------
 						FUNCTION DEFINITIONS
 ----------------------------------------------------------------------------*/
@@ -73,9 +88,9 @@ void display()
 	glDepthFunc(GL_LESS);									// depth-testing interprets a smaller value as "closer"
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		// Clear the color and buffer bits to make a clean slate
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);					//Create a background
-
+	PointToTriangle();
 	TriangleToTriangle();
-
+	draw_texts();
 	glutSwapBuffers();
 }
 
@@ -87,13 +102,15 @@ void updateScene()
 	if (delta >= 0.03f)
 	{
 		lastFrame = currFrame;
-		glutPostRedisplay();
 		rotateTriangle(0.5);
 		closestPoint = getClosestPointTriangle(triangle, mouseLocation);
 		mouseTriangle[0] = triangle[0]/2.0f + mouseLocation;
 		mouseTriangle[1] = triangle[1]/2.0f + mouseLocation;
 		mouseTriangle[2] = triangle[2]/2.0f + mouseLocation;
-		getClosestTriangleTriangle(triangle, &mouseTriangle[0], trianglePoints[0], trianglePoints[1]);
+		triangleDistance = getClosestTriangleTriangle(triangle, mouseTriangle, trianglePoints[0], trianglePoints[1], simplex);
+		text = "Distance between Triangles: " + to_string(triangleDistance) + "\n";
+		text = "Simplex: " + glm::to_string(simplex[0]) + "\n\t, " + glm::to_string(simplex[1]) + "\n\t, " + glm::to_string(simplex[2]) + "\n";
+		glutPostRedisplay();
 	}
 	
 }
@@ -168,7 +185,7 @@ int main(int argc, char** argv)
 
 void rotateTriangle(float degrees)
 {
-	glm::mat4 rotate = glm::rotate(glm::mat4(), degrees, glm::vec3(0.0f, 0.0f, 1.0f));
+	glm::mat4 rotate = glm::rotate(identityMat, degrees, glm::vec3(0.0f, 0.0f, 1.0f));
 	for (int i = 0; i < 3; i++)
 	{
 		glm::vec4 t = rotate * glm::vec4(triangle[i], 1.0f);
@@ -178,14 +195,13 @@ void rotateTriangle(float degrees)
 
 void PointToTriangle()
 {
-	drawLine(simpleShaderID, glm::mat4(), glm::mat4(), closestPoint, mouseLocation, PURPLE);
 
 	//Check whether the mouse is within the triangle face
 
 	if (closestPoint == mouseLocation)
-		drawTriangle(simpleShaderID, glm::mat4(), glm::mat4(), triangle[0], triangle[1], triangle[2], PURPLE);
+		drawTriangle(simpleShaderID, identityMat, identityMat, triangle[0], triangle[1], triangle[2], PURPLE, true);
 	else
-		drawTriangle(simpleShaderID, glm::mat4(), glm::mat4(), triangle[0], triangle[1], triangle[2], YELLOW);
+		drawTriangle(simpleShaderID, identityMat, identityMat, triangle[0], triangle[1], triangle[2], YELLOW, true);
 
 
 	glm::vec3 v12 = glm::normalize(triangle[0] - triangle[1]);
@@ -198,15 +214,18 @@ void PointToTriangle()
 	{
 		//<p1, p2>
 		if (glm::dot(glm::normalize(triangle[0] - closestPoint), v12) >= 0.9999)
-			drawTriangle(simpleShaderID, glm::mat4(), glm::mat4(), triangle[0], triangle[1], mouseLocation, PURPLE);
+			drawTriangle(simpleShaderID, identityMat, identityMat, triangle[0], triangle[1], mouseLocation, PURPLE, true);
 		//<p2, p3>
 		if (glm::dot(glm::normalize(triangle[1] - closestPoint), v23) >= 0.9999)
-			drawTriangle(simpleShaderID, glm::mat4(), glm::mat4(), triangle[1], triangle[2], mouseLocation, PURPLE);
+			drawTriangle(simpleShaderID, identityMat, identityMat, triangle[1], triangle[2], mouseLocation, PURPLE, true);
 		//<p3, p1>
 		if (glm::dot(glm::normalize(triangle[2] - closestPoint), v31) >= 0.9999)
-			drawTriangle(simpleShaderID, glm::mat4(), glm::mat4(), triangle[2], triangle[0], mouseLocation, PURPLE);
+			drawTriangle(simpleShaderID, identityMat, identityMat, triangle[2], triangle[0], mouseLocation, PURPLE, true);
 	}
-	string text;
+	else
+	{
+		drawLine(simpleShaderID, identityMat, identityMat, closestPoint, mouseLocation, PURPLE);
+	}
 	text += "P1 = " + glm::to_string(triangle[0]) + "\n";
 	text += "P2 = " + glm::to_string(triangle[1]) + "\n";
 	text += "P3 = " + glm::to_string(triangle[2]) + "\n";
@@ -222,9 +241,20 @@ void PointToTriangle()
 
 void TriangleToTriangle()
 {
-	drawTriangle(simpleShaderID, glm::mat4(), glm::mat4(), triangle[0], triangle[1], triangle[2], YELLOW);
+	//drawTriangle(simpleShaderID, identityMat, identityMat, triangle[0], triangle[1], triangle[2], YELLOW);
 
-	drawTriangle(simpleShaderID, glm::mat4(), glm::mat4(), mouseTriangle[0], mouseTriangle[1], mouseTriangle[2], YELLOW);
+	if (triangleDistance == 0.0f)
+	{
+		drawTriangle(simpleShaderID, identityMat, identityMat, mouseTriangle[0], mouseTriangle[1], mouseTriangle[2], BLUE, true);
+	}
+	else
+	{
+		drawTriangle(simpleShaderID, identityMat, identityMat, mouseTriangle[0], mouseTriangle[1], mouseTriangle[2], YELLOW, true);
+	}
 
-	drawLine(simpleShaderID, glm::mat4(), glm::mat4(), trianglePoints[0], trianglePoints[1], PURPLE);
+	drawTriangle(simpleShaderID, identityMat, identityMat, simplex[0], simplex[1], simplex[2], RED, true);
+
+	drawPoint(simpleShaderID, identityMat, identityMat, glm::vec3(), GOLD);
+
+	//drawLine(simpleShaderID, identityMat, identityMat, trianglePoints[0], trianglePoints[1], PURPLE);
 }

@@ -79,8 +79,8 @@ EulerCamera cam(startingPos, width, height);
 							OTHER VARIABLES
 ----------------------------------------------------------------------------*/
 
-const char* atlas_image = "freemono.png";
-const char* atlas_meta = "freemono.meta";
+const char* atlas_image = "../freemono.png";
+const char* atlas_meta = "../freemono.meta";
 
 float fontSize = 25.0f;
 int textID = -1;
